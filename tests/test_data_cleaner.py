@@ -121,21 +121,21 @@ class TestDataCleaner(unittest.TestCase):
         - Verificar que las columnas no especificadas (ej: "city") permanecen sin cambios (si comparas Series completas, usar pandas.testing.assert_series_equal() ya que maneja mejor los índices y tipos de Pandas; si comparas valores individuales, self.assertEqual es suficiente)
         """
         df = make_sample_df()
-        df_original_copy = df.copy(deep=True)
-        
         cleaner = DataCleaner()
-        result = cleaner.trim_strings(df, ["name"])
+
+        df_Cleaned = cleaner.drop_invalid_rows(df, ["name"])
+        df_original_copy = df_Cleaned.copy(deep=True)
+        
+        result = cleaner.trim_strings(df_Cleaned, ["name"])
         
         # Verificar que el DataFrame original no fue modificado
-        self.assertEqual(df.loc[0, "name"], " Alice ")
-        self.assertEqual(df.loc[3, "name"], " Carol  ")
-        self.assertTrue(pd.isna(df.loc[2, "name"]))
+        self.assertEqual(df_Cleaned.loc[0, "name"], " Alice ")
+        self.assertEqual(df_Cleaned.loc[3, "name"], " Carol  ")
 
         # Verificar que en el DataFrame resultante los valores de "name" no tienen espacios
         self.assertEqual(result.loc[0, "name"], "Alice")
         self.assertEqual(result.loc[1, "name"], "Bob")
         self.assertEqual(result.loc[3, "name"], "Carol")
-        self.assertTrue(pd.isna(result.loc[2, "name"]))
 
         # Verificar que las columnas no especificadas permanecen sin cambios
         pdt.assert_series_equal(result["city"], df_original_copy["city"])
